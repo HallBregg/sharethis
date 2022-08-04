@@ -1,0 +1,22 @@
+version: "3.4"
+
+services:
+  mailer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - .:/opt/app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    command: python -m mailer.main
+
+  mailer_smtp:
+    image: python:3.10
+    container_name: mailer_smtp
+    ports:
+      - "1025:1025"
+    command: python -m smtpd -c DebuggingServer -d -n 0.0.0.0:1025 0.0.0.0:1025

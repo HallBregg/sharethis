@@ -1,0 +1,63 @@
+version: "3.4"
+
+volumes:
+  bucket-data:
+  db-data:
+
+services:
+
+  sharethis:
+    build:
+      context: .
+      target: dev
+    env_file: .env
+    volumes:
+      - .:/opt/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - bucket
+#    command: python -m sharethis.entrypoints.api
+    command: flask run --host=0.0.0.0 --port=8080
+
+  cleaner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    env_file: .env
+    environment:
+      - DEBUG=False
+    volumes:
+      - .:/opt/app
+    depends_on:
+      - db
+      - bucket
+    command: bash -c "python -m sharethis.jobs.cleaner"
+
+  bucket:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - bucket-data:/data
+    environment:
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: password
+    command: server --address 0.0.0.0:9000 --console-address ":9001" /data
+
+  db:
+    image: postgres:latest
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+      start_period: 0s

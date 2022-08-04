@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+*.egg-info
+.pytest_cache
+.vscode
+.idea
+/sharethis/dist/
+/sharethis/.env
+/sharethis/.env
+/sharethis/.mypy_cache/
+/azure_mailer/config.json
+/.github/
+.idea
+.DS_Store

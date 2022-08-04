@@ -1,0 +1,70 @@
+swagger: '2.0'
+info:
+  description: Azure Logic App.
+  title: SharethisMailer
+  version: 1.0.0.0
+host: prod-02.northcentralus.logic.azure.com
+basePath: /workflows/085e7b6e33744cc5b0a5cb7727c46267/triggers
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+
+definitions:
+  request-manual:
+    properties:
+      email:
+        type: string
+      template:
+        enum:
+          - new_upload
+      url:
+        type: string
+    required:
+      - template
+    type: object
+
+paths:
+  /manual/paths/invoke:
+    post:
+      deprecated: false
+      description: Trigger a run of the logic app.
+      operationId: manual-invoke
+      parameters:
+        - description: The service API version.
+          in: query
+          name: api-version
+          required: true
+          type: string
+        - description: The permissions; generally 'read' or 'write'.
+          in: query
+          name: sp
+          required: true
+          type: string
+        - description: The version number of the query parameters.
+          in: query
+          name: sv
+          required: true
+          type: string
+        - description: The SHA 256 hash of the entire request URI with an internal key.
+          in: query
+          name: sig
+          required: true
+          type: string
+        - description: The request body.
+          in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/request-manual'
+      responses:
+        '202':
+          description: The Logic App Response.
+          schema:
+            type: object
+        default:
+          description: The Logic App Response.
+          schema:
+            type: object

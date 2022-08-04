@@ -1,0 +1,137 @@
+openapi: 3.0.0
+info:
+  title: Sharethis Service API
+  description: ""
+  version: 0.0.1
+
+
+components:
+  schemas:
+    APIException:
+      type: object
+      description: ''
+      properties:
+        status:
+          type: integer
+          example: 400
+          description: HTTP response status code.
+        code:
+          type: string
+          example: invalid
+          enum: [core_error, invalid, not_found, unassigned_error, validation_error, bucket_error, db_error]
+          description: Unique code identifying an error.
+        message:
+          type: string
+          example: Check details for more information.
+          description: Human readable message about an error.
+        details:
+          type: object
+          nullable: true
+          description: Collection of errors.
+
+    UploadDataObject:
+      type: object
+      description: ''
+      properties:
+        time_to_live:
+          description: Number of days the upload file is online.
+          type: integer
+          minimum: 1
+          maximum: 7
+          example: 1
+        encryption_method:
+          description: Method of encryption. Because the client handles encryption we allow any string.
+          type: string
+          example: password
+          nullable: true
+        email:
+          description: Where to send notification about current upload with a download link.
+          type: string
+          format: email
+          example: me@mail.com
+
+    UploadObject:
+      type: object
+      description: ''
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Upload file content.
+        data:
+          $ref: '#/components/schemas/UploadDataObject'
+
+    UploadResponseObject:
+      type: object
+      description: ''
+      properties:
+        key:
+          type: string
+          format: uuid4.hex
+          example: b9cb4f6e322f4fa9a9b9439f389855cc
+
+    DownloadResponseObject:
+      type: object
+      description: ''
+      properties:
+        url:
+          type: string
+          format: url
+          example: https://bucket.demo.sharethis.space/container0/ba735055dc7242f48fc355bd7b7468d4?se=2022-04-18T07%3A03%3A13Z&sp=rt&sv=2021-04-10&sr=b&rscd=attachment%3B%20filename%3DScreenshot%202022-03-12%20at%2011.12.58.png&rsct=image/png&sig=HSA8JMpR/u4378jykf7aQilkSD3oP34LB8SOA87h%2B3g%3D
+        encryption_method:
+          type: string
+          example: password
+        file_name:
+          type: string
+          example: myfile.pdf.sharethis
+
+paths:
+  /api/upload:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadObject'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponseObject'
+        '400':
+          description: Given data is incorrect or data could not be processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIException'
+
+  /api/download/{key}:
+    get:
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+            format: uuid4.hex
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadResponseObject'
+        '400':
+          description: Could not process request. Maybe the object is malformed or damaged.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIException'
+        '404':
+          description: Resource with a given key does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIException'

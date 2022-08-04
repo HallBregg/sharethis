@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Sharethis Mailer API
+  description: ""
+  version: 0.0.1
+
+components:
+  schemas:
+    SendEmailTemplateObject:
+      type: object
+      description: ''
+      required: [email, tempalte]
+      properties:
+        email:
+          type: string
+          format: email
+        template:
+          type: string
+          enum: [new_upload]
+    SendEmailTemplateResponseObject:
+      type: object
+      description: ''
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+          default: Email send successfully.
+
+paths:
+  /send:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailTemplateObject'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailTemplateResponseObject'
